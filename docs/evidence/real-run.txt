@@ -1,0 +1,10 @@
+Real run of examples/demo/benchforge.toml on one machine (a cloud sandbox). Timings are specific to it and will differ on yours; this file is not compared by any test.
+Reproduce: benchforge run -C examples/demo && benchforge show benchforge-result.json
+
+BenchForge: Orchard Sync (demo)
+recorded 2026-10-30T04:11:50Z
+  benchforge 0.1.0, cpus 2, implementation CPython, machine x86_64, platform Linux-6.18.44-fc-v185-x86_64-with-glibc2.39, python 3.13.18
+  sort-numbers: median 197.29 us  min 177.27 us  p95 231.09 us  stdev 17.79 us  n=30  outliers 1
+  hash-blob: median 132.60 us  min 131.14 us  p95 149.98 us  stdev 6.30 us  n=30  outliers 4  budget 50 ms: ok
+  json-roundtrip: median 143.83 us  min 136.28 us  p95 167.88 us  stdev 9.18 us  n=30  outliers 5
+  interpreter-startup: median 13.68 ms  min 10.92 ms  p95 15.34 ms  stdev 1.27 ms  n=30  outliers 5
