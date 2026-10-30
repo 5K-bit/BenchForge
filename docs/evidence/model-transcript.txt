@@ -1,0 +1,24 @@
+# Stand-in server with invented timings. It exercises BenchForge; it measures no real model.
+
+== 1. Baseline pass ==
+$ benchforge run --out baseline.json
+BenchForge: stand-in model
+  stand-in: median 20.40 ms  min 20.10 ms  p95 20.70 ms  stdev 220.48 us  n=9  outliers 0
+      per generated token, 49.02 tokens/s, first token 160.0 ms, model memory 2.00 GiB
+[exit 0]
+
+== 2. Candidate pass (the stand-in is now 25% slower per token) ==
+$ benchforge run --out candidate.json
+BenchForge: stand-in model
+  stand-in: median 25.50 ms  min 25.12 ms  p95 25.88 ms  stdev 275.60 us  n=9  outliers 0
+      per generated token, 39.216 tokens/s, first token 160.0 ms, model memory 2.00 GiB
+[exit 0]
+
+== 3. Compare ==
+$ benchforge compare baseline.json candidate.json --fail-on-regression
+BenchForge: stand-in model
+regression: slower than 10% with p < 0.01
+  regression   stand-in    20.40 ms -> 25.50 ms    1.25x [1.23, 1.27]   p 0.0004   25.0% slower
+1 regression
+[exit 2]
+

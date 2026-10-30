@@ -18,9 +18,11 @@
 
 ## Overview
 
-A single timing tells you little: run it twice and you get two numbers. BenchForge **records many samples** of each benchmark (a command, or a Python function), stores them in a result file along with the machine they came from, and later **compares two result files**: the ratio of medians, a Mann-Whitney test for whether the difference is distinguishable from noise, and a bootstrap interval for the ratio. A change is a **regression** only if it is both bigger than your threshold (default 10%) and statistically significant (default p < 0.01). `compare --fail-on-regression` turns that into an exit code for CI.
+A single timing tells you little: run it twice and you get two numbers. BenchForge **records many samples** of each benchmark (a command, a Python function, or a local model served by Ollama), stores them in a result file along with the machine they came from, and later **compares two result files**: the ratio of medians, a Mann-Whitney test for whether the difference is distinguishable from noise, and a bootstrap interval for the ratio. A change is a **regression** only if it is both bigger than your threshold (default 10%) and statistically significant (default p < 0.01). `compare --fail-on-regression` turns that into an exit code for CI.
 
-Part of the OBEOS projects, and it works completely on its own. No server, no account, no network access of its own.
+Part of the OBEOS projects, and it works completely on its own. No server, no account, no telemetry. The only network use is opt-in: a `model` benchmark talks to your own Ollama, on this machine unless you explicitly allow another host.
+
+**Comparing local models.** A `model` benchmark sends a fixed list of prompts to Ollama (fixed seed, temperature 0) and records one sample per pass, in nanoseconds per generated token, so the same statistics decide whether model B is really slower than model A. It also records tokens per second, time to first token, the memory Ollama reports for the loaded model, and whether the output stayed identical between passes.
 
 > **A suite file is code.** `benchforge run` starts the commands and imports the functions the suite names. Review a suite like a build script. `show` and `compare` only read result files and never run anything.
 
@@ -88,7 +90,23 @@ budget_ms = 150                            # 'run' exits 2 if the median is over
 | `show FILE [--format text\|json]` | Summarise a result file |
 | `compare BASE CAND [--threshold 0.10] [--alpha 0.01] [--format text\|md\|html\|json] [--out F] [--fail-on-regression]` | Compare two result files. Exit 2 on a regression only with `--fail-on-regression` |
 
-Exit code 1 always means an error (bad file, unreadable path).
+Exit code 1 always means an error (bad file, unreadable path, Ollama not reachable).
+
+### Local models with Ollama
+
+```toml
+[[bench]]
+id = "llama3-2-3b"
+model = "llama3.2:3b"
+prompts = ["Summarise in two sentences: ...", "List three risks of ..."]   # the fixed task
+num_predict = 128      # tokens per request (default 128)
+runs = 7               # passes over all prompts (default 5); warmup defaults to 1
+# host = "http://127.0.0.1:11434"   # default; another machine needs allow_remote = true
+```
+
+Add one `[[bench]]` per model with the same prompts, run once, then `benchforge compare` two result files (or two runs of the same model after a change). Requires `ollama serve` and the model pulled. A full example is [`examples/models/benchforge.toml`](examples/models/benchforge.toml). Timings are the durations Ollama reports for itself; memory is what `/api/ps` says the loaded model occupies. `budget_ms` on a model benchmark means milliseconds *per token*.
+
+Without Ollama you can still see the whole flow against a stand-in server with invented timings: `python examples/model_demo.py --out /tmp/evidence` (recorded in [docs/evidence/model-transcript.txt](docs/evidence/model-transcript.txt)). That demonstrates the plumbing and statistics, not any real model.
 
 | Verdict | Meaning |
 |---|---|
@@ -132,7 +150,10 @@ BenchForge does not claim more than it has shown:
 
 - **Wall-clock time on a real machine is noisy.** Shared CI runners, frequency scaling and other processes move results. BenchForge reports the spread and refuses to call a difference with too few samples, but it cannot make a noisy machine quiet.
 - **Statistics are approximate.** The p-value uses a normal approximation (reasonable from about 10 samples per side). At the default alpha of 0.01, about one comparison in a hundred of identical code is flagged.
-- **Time only.** No memory, CPU time, allocations or throughput yet.
+- **Time, plus what Ollama reports.** Command and Python benchmarks measure wall-clock time only. Model benchmarks add tokens per second, first-token latency and the loaded model's memory as Ollama reports it; BenchForge does not measure process memory itself, CPU time or allocations.
+- **Model results are not quality results.** Speed says nothing about how good the answers are. Output is compared only by hash between passes, to flag nondeterminism; it is not scored.
+- **No real model was benchmarked in the recorded evidence.** The model transcript uses a stand-in server. The HTTP client is tested against a local fake of Ollama's `/api/generate` and `/api/ps`; it has not yet been run against a real Ollama in CI.
+- **Model comparisons need like-for-like conditions.** Same prompts, same `num_predict`, a warm model, nothing else using the GPU or RAM; different quantisations are different models.
 - **Command benchmarks include process start-up.** That is the point for a CLI, and a distortion for a library; use a Python callable for the latter.
 - **Callables run in the same process.** Earlier benchmarks can warm caches for later ones; order matters little but is not controlled.
 - **Tested with synthetic data and small real runs.** The recorded comparison uses made-up numbers. The tests run real commands and functions, but nothing has been validated against a large production suite.
@@ -142,7 +163,9 @@ BenchForge does not claim more than it has shown:
 
 - [x] Suite, runner, result files, statistics, compare, four report formats, demo and recorded evidence
 - [ ] Run on GitHub CI (Linux and Windows) and confirm the matrix is green
-- [ ] Memory and CPU-time measurements
+- [x] Local model benchmarks through Ollama (tokens per second, first-token latency, reported model memory)
+- [ ] Run a model suite against a real Ollama and record it as evidence
+- [ ] Process memory and CPU-time measurements for command benchmarks
 - [ ] A history file and a trend report across many runs
 - [ ] Publish a comparison as ProofBoard evidence (optional OBEOS integration)
 - [ ] `obeos.manifest.json` integration so a component's release can be gated on its benchmarks

@@ -1,0 +1,28 @@
+# Compare local models on one fixed task with a real Ollama (https://ollama.com).
+# Requires: `ollama serve` running, and the models pulled (`ollama pull llama3.2:3b`).
+# One sample is one pass over every prompt, in nanoseconds per generated token (lower is better).
+
+[suite]
+name = "local models, summary task"
+
+[[bench]]
+id = "llama3-2-3b"
+title = "llama3.2:3b"
+model = "llama3.2:3b"
+num_predict = 128
+runs = 7
+prompts = [
+  "Summarise in two sentences: A backup you have never restored is a hope, not a backup.",
+  "List three risks of storing pay records only in a browser.",
+]
+
+[[bench]]
+id = "qwen2-5-1-5b"
+title = "qwen2.5:1.5b"
+model = "qwen2.5:1.5b"
+num_predict = 128
+runs = 7
+prompts = [
+  "Summarise in two sentences: A backup you have never restored is a hope, not a backup.",
+  "List three risks of storing pay records only in a browser.",
+]

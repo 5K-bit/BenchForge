@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `model` benchmarks: time local models through Ollama's HTTP API with a fixed prompt set, fixed seed and temperature 0. Samples are nanoseconds per generated token, so `compare` works unchanged. Records tokens per second, time to first token, reported model memory and an output-stability flag in an optional `metrics` object (result format stays 1; older files read unchanged).
+- Loopback-only by default; another host needs `allow_remote = true`. Proxy settings and redirects are ignored.
+- `examples/model_demo.py` and `examples/models/benchforge.toml`; recorded stand-in transcript.
+
 ## [0.1.0] - 2026-10-30
 
 First working version.

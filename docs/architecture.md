@@ -3,7 +3,8 @@
 ```
 benchforge.toml ─► model ─► runner ─► resultfile ─► JSON on disk
   suite (strict)     │         │  command: subprocess, no shell
-                     │         └─ callable: import, loop-calibrated
+                     │         ├─ callable: import, loop-calibrated
+                     │         └─ model: ollama.py → local HTTP API, ns per generated token
                      ▼
 two result files ─► compare ─► stats (summary · Mann-Whitney · bootstrap) ─► render
                                                     text · Markdown · HTML · JSON
@@ -13,6 +14,7 @@ two result files ─► compare ─► stats (summary · Mann-Whitney · bootstr
 |---|---|
 | `model.py` | Parse and strictly validate the suite file into frozen dataclasses. |
 | `runner.py` | Run a command or callable, take samples with an injectable timer, record per-benchmark errors. |
+| `ollama.py` | Model benchmarks: loopback HTTP client for `/api/generate` and `/api/ps` (no redirects, no proxies, size caps), and the per-pass measurement with an injectable backend. |
 | `resultfile.py` | Read and write result files (strictly validated), fingerprint the machine. |
 | `stats.py` | Summary statistics, the Mann-Whitney U test (normal approximation, tie-corrected), a seeded bootstrap interval. |
 | `compare.py` | Turn two result files into one verdict per benchmark. |

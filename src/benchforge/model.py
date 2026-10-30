@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import tomllib
+import urllib.parse
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -27,14 +28,55 @@ KEYS = {
     "min_sample_ms",
     "budget_ms",
     "env",
+    "model",
+    "host",
+    "prompts",
+    "num_predict",
+    "seed",
+    "temperature",
+    "allow_remote",
 }
+MODEL_ONLY = {"host", "prompts", "num_predict", "seed", "temperature", "allow_remote"}
+MODEL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/@-]{0,127}$")
+DEFAULT_HOST = "http://127.0.0.1:11434"
+MAX_PROMPTS = 32
+MAX_PROMPT_CHARS = 8000
+
+
+LOOPBACK = {"127.0.0.1", "localhost", "::1"}
+
+
+def check_host(host: str, allow_remote: bool, where: str) -> str:
+    """A plain http(s) origin. Loopback only, unless the suite says allow_remote = true."""
+    try:
+        parts = urllib.parse.urlsplit(host)
+        port = parts.port
+    except ValueError:
+        raise BenchForgeError(f"{where}.host: not a valid URL") from None
+    if parts.scheme not in ("http", "https") or not parts.hostname:
+        raise BenchForgeError(f"{where}.host: must look like http://127.0.0.1:11434")
+    if (
+        parts.username
+        or parts.password
+        or parts.query
+        or parts.fragment
+        or parts.path not in ("", "/")
+    ):
+        raise BenchForgeError(f"{where}.host: must be just a scheme, host and optional port")
+    if parts.hostname not in LOOPBACK and not allow_remote:
+        raise BenchForgeError(
+            f"{where}.host: {parts.hostname!r} is not this machine; set allow_remote = true to "
+            "benchmark a model on another host (prompts are sent there)"
+        )
+    shown = f"[{parts.hostname}]" if ":" in parts.hostname else parts.hostname
+    return f"{parts.scheme}://{shown}" + (f":{port}" if port else "")
 
 
 @dataclass(frozen=True)
 class Bench:
     id: str
     title: str
-    kind: str  # "command" or "callable"
+    kind: str  # "command", "callable" or "model"
     argv: tuple[str, ...]
     target: str
     pythonpath: tuple[str, ...]
@@ -45,6 +87,12 @@ class Bench:
     min_sample_ms: float
     budget_ms: float | None
     env: tuple[tuple[str, str], ...]
+    model: str = ""
+    host: str = ""
+    prompts: tuple[str, ...] = ()
+    num_predict: int = 0
+    seed: int = 0
+    temperature: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -103,11 +151,47 @@ def parse_suite(raw: dict[str, Any]) -> Suite:
             raise BenchForgeError(f"{where}.id: duplicate id {bid!r}")
         seen.add(bid)
         where = f"bench {bid}"
-        if ("cmd" in table) == ("python" in table):
-            raise BenchForgeError(f"{where}: give exactly one of 'cmd' or 'python'")
+        if sum(key in table for key in ("cmd", "python", "model")) != 1:
+            raise BenchForgeError(f"{where}: give exactly one of 'cmd', 'python' or 'model'")
+        if "model" not in table:
+            stray = sorted(MODEL_ONLY & set(table))
+            if stray:
+                raise BenchForgeError(
+                    f"{where}: {', '.join(stray)} only apply to a 'model' benchmark"
+                )
+        model_name = ""
+        host = ""
+        prompts: tuple[str, ...] = ()
+        if "model" in table:
+            model_name = table["model"]
+            if not isinstance(model_name, str) or not MODEL_RE.match(model_name):
+                raise BenchForgeError(f"{where}.model: must look like 'llama3.2:3b'")
+            allow = table.get("allow_remote", False)
+            if not isinstance(allow, bool):
+                raise BenchForgeError(f"{where}.allow_remote: must be true or false")
+            host = check_host(table.get("host", DEFAULT_HOST), allow, where)
+            raw_prompts = table.get("prompts")
+            if (
+                not isinstance(raw_prompts, list)
+                or not 1 <= len(raw_prompts) <= MAX_PROMPTS
+                or not all(
+                    isinstance(p, str)
+                    and p.strip()
+                    and len(p) <= MAX_PROMPT_CHARS
+                    and "\x00" not in p
+                    for p in raw_prompts
+                )
+            ):
+                raise BenchForgeError(
+                    f"{where}.prompts: give 1 to {MAX_PROMPTS} non-empty strings "
+                    f"of at most {MAX_PROMPT_CHARS} characters (the fixed task)"
+                )
+            prompts = tuple(raw_prompts)
         argv: tuple[str, ...] = ()
         target = ""
-        if "cmd" in table:
+        if "model" in table:
+            pass
+        elif "cmd" in table:
             cmd = table["cmd"]
             if (
                 not isinstance(cmd, list)
@@ -137,19 +221,38 @@ def parse_suite(raw: dict[str, Any]) -> Suite:
             Bench(
                 id=bid,
                 title=title,
-                kind="command" if argv else "callable",
+                kind="model" if model_name else "command" if argv else "callable",
                 argv=argv,
                 target=target,
                 pythonpath=tuple(safe_relpath(p, f"{where}.pythonpath") for p in paths_raw),
                 cwd=safe_relpath(table.get("cwd", "."), f"{where}.cwd")
                 if table.get("cwd")
                 else ".",
-                runs=int(_number(table.get("runs", 20), f"{where}.runs", 1, 10000, integer=True)),
+                runs=int(
+                    _number(
+                        table.get("runs", 5 if model_name else 20),
+                        f"{where}.runs",
+                        1,
+                        10000,
+                        integer=True,
+                    )
+                ),
                 warmup=int(
-                    _number(table.get("warmup", 2), f"{where}.warmup", 0, 100, integer=True)
+                    _number(
+                        table.get("warmup", 1 if model_name else 2),
+                        f"{where}.warmup",
+                        0,
+                        100,
+                        integer=True,
+                    )
                 ),
                 timeout_s=float(
-                    _number(table.get("timeout_s", 60), f"{where}.timeout_s", 0.1, 3600)
+                    _number(
+                        table.get("timeout_s", 300 if model_name else 60),
+                        f"{where}.timeout_s",
+                        0.1,
+                        3600,
+                    )
                 ),
                 min_sample_ms=float(
                     _number(table.get("min_sample_ms", 10), f"{where}.min_sample_ms", 0.001, 10000)
@@ -158,6 +261,20 @@ def parse_suite(raw: dict[str, Any]) -> Suite:
                 if budget is None
                 else float(_number(budget, f"{where}.budget_ms", 0.000001, 1e9)),
                 env=tuple(sorted(env_raw.items())),
+                model=model_name,
+                host=host,
+                prompts=prompts,
+                num_predict=int(
+                    _number(
+                        table.get("num_predict", 128), f"{where}.num_predict", 1, 4096, integer=True
+                    )
+                ),
+                seed=int(
+                    _number(table.get("seed", 0), f"{where}.seed", 0, 2**31 - 1, integer=True)
+                ),
+                temperature=float(
+                    _number(table.get("temperature", 0), f"{where}.temperature", 0, 2)
+                ),
             )
         )
     return Suite(name=name, benches=tuple(out))

@@ -145,3 +145,18 @@ def test_acceptance_reproduces_recorded_evidence(tmp_path: Path) -> None:
         assert (tmp_path / name).read_text(encoding="utf-8") == (recorded / name).read_text(
             encoding="utf-8"
         ), name
+
+
+def test_model_demo_transcript_is_reproducible(tmp_path: Path) -> None:
+    script = ROOT / "examples" / "model_demo.py"
+    proc = subprocess.run(  # noqa: S603
+        [sys.executable, str(script), "--out", str(tmp_path)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert proc.returncode == 0, proc.stderr
+    recorded = (ROOT / "docs" / "evidence" / "model-transcript.txt").read_text(encoding="utf-8")
+    fresh = (tmp_path / "model-transcript.txt").read_text(encoding="utf-8")
+    assert fresh.replace("\r\n", "\n") == recorded.replace("\r\n", "\n")
+    assert "regression   stand-in" in fresh

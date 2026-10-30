@@ -67,7 +67,24 @@ def show_text(result: ResultFile) -> str:
             f"  {res.id}: median {fmt_ns(s.median)}  min {fmt_ns(s.minimum)}  p95 {fmt_ns(s.p95)}"
             f"  stdev {fmt_ns(s.stdev)}  n={s.n}  outliers {s.outliers}{budget}"
         )
+        if res.kind == "model":
+            lines.append("      " + _model_line(res))
     return "\n".join(lines) + "\n"
+
+
+def _model_line(res: BenchResult) -> str:
+    m = res.metrics
+    parts = ["per generated token"]
+    if "tokens_per_s_median" in m:
+        parts.append(f"{m['tokens_per_s_median']} tokens/s")
+    if "first_token_ms_median" in m:
+        parts.append(f"first token {m['first_token_ms_median']} ms")
+    memory = m.get("model_memory_bytes")
+    if isinstance(memory, int):
+        parts.append(f"model memory {memory / (1 << 30):.2f} GiB")
+    if m.get("output_stable") == "no":
+        parts.append("OUTPUT VARIED between passes")
+    return ", ".join(parts)
 
 
 def show_json(result: ResultFile) -> str:

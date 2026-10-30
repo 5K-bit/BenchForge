@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import os
 import platform
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +26,7 @@ class BenchResult:
     samples: tuple[int, ...]
     error: str | None = None
     budget_ms: float | None = None
+    metrics: dict[str, float | int | str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -48,24 +49,27 @@ def fingerprint() -> dict[str, str]:
 
 
 def to_json(result: ResultFile) -> str:
+    def entry(r: BenchResult) -> dict[str, Any]:
+        item: dict[str, Any] = {
+            "id": r.id,
+            "title": r.title,
+            "kind": r.kind,
+            "unit": "ns",
+            "loops": r.loops,
+            "samples": list(r.samples),
+            "error": r.error,
+            "budget_ms": r.budget_ms,
+        }
+        if r.metrics:
+            item["metrics"] = dict(sorted(r.metrics.items()))
+        return item
+
     doc: dict[str, Any] = {
         "format": 1,
         "suite": result.suite,
         "created": result.created,
         "environment": dict(sorted(result.environment.items())),
-        "benchmarks": [
-            {
-                "id": r.id,
-                "title": r.title,
-                "kind": r.kind,
-                "unit": "ns",
-                "loops": r.loops,
-                "samples": list(r.samples),
-                "error": r.error,
-                "budget_ms": r.budget_ms,
-            }
-            for r in result.results
-        ],
+        "benchmarks": [entry(r) for r in result.results],
     }
     return json.dumps(doc, indent=1, sort_keys=True) + "\n"
 
@@ -80,6 +84,20 @@ def _str(value: Any, where: str, limit: int = 300) -> str:
     if not isinstance(value, str) or len(value) > limit:
         raise ValueError(f"{where} must be a string of at most {limit} characters")
     return value
+
+
+def _metrics(raw: Any, bid: str) -> dict[str, float | int | str]:
+    if raw is None:
+        return {}
+    if not isinstance(raw, dict) or len(raw) > 32:
+        raise ValueError(f"{bid}: metrics must be an object of at most 32 entries")
+    out: dict[str, float | int | str] = {}
+    for key, value in raw.items():
+        _str(key, f"{bid}: metric name", 64)
+        if isinstance(value, bool) or not isinstance(value, int | float | str):
+            raise ValueError(f"{bid}: metric {key!r} must be a number or a short string")
+        out[key] = _str(value, f"{bid}: metric {key!r}", 200) if isinstance(value, str) else value
+    return out
 
 
 def read_result(path: Path) -> ResultFile:
@@ -124,6 +142,7 @@ def read_result(path: Path) -> ResultFile:
                 isinstance(budget, bool) or not isinstance(budget, int | float)
             ):
                 raise ValueError(f"{bid}: budget_ms must be a number")
+            metrics = _metrics(item.get("metrics"), bid)
             error = item.get("error")
             results.append(
                 BenchResult(
@@ -134,6 +153,7 @@ def read_result(path: Path) -> ResultFile:
                     samples=tuple(samples),
                     error=None if error is None else _str(error, "error", 1000),
                     budget_ms=None if budget is None else float(budget),
+                    metrics=metrics,
                 )
             )
         return ResultFile(

@@ -13,6 +13,7 @@ from pathlib import Path
 
 from .errors import BenchForgeError
 from .model import Bench, Suite
+from .ollama import Backend, OllamaBackend, measure_model
 from .resultfile import BenchResult, ResultFile, fingerprint
 
 Timer = Callable[[], int]
@@ -105,11 +106,16 @@ def run_bench(
     warmup: int | None = None,
     timer: Timer = time.perf_counter_ns,
     executor: Executor = run_command,
+    backend: Backend | None = None,
 ) -> BenchResult:
     n_runs = runs if runs is not None else bench.runs
     n_warm = warmup if warmup is not None else bench.warmup
+    metrics: dict[str, float | int | str] = {}
     try:
-        if bench.kind == "callable":
+        if bench.kind == "model":
+            samples, metrics = measure_model(bench, backend or OllamaBackend(), n_runs, n_warm)
+            loops = 1
+        elif bench.kind == "callable":
             loops, samples = measure_callable(
                 load_callable(bench, root), bench, n_runs, n_warm, timer
             )
@@ -135,7 +141,7 @@ def run_bench(
             bench.budget_ms,
         )
     return BenchResult(
-        bench.id, bench.title, bench.kind, loops, tuple(samples), None, bench.budget_ms
+        bench.id, bench.title, bench.kind, loops, tuple(samples), None, bench.budget_ms, metrics
     )
 
 
@@ -148,6 +154,7 @@ def run_suite(
     warmup: int | None = None,
     timer: Timer = time.perf_counter_ns,
     executor: Executor = run_command,
+    backend: Backend | None = None,
     now: datetime | None = None,
     progress: Callable[[str], None] | None = None,
 ) -> ResultFile:
@@ -162,7 +169,15 @@ def run_suite(
         if progress:
             progress(bench.id)
         results.append(
-            run_bench(bench, root, runs=runs, warmup=warmup, timer=timer, executor=executor)
+            run_bench(
+                bench,
+                root,
+                runs=runs,
+                warmup=warmup,
+                timer=timer,
+                executor=executor,
+                backend=backend,
+            )
         )
     moment = (now or datetime.now(UTC)).astimezone(UTC).replace(microsecond=0)
     return ResultFile(
