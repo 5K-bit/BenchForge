@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" role="img" aria-labelledby="title desc">
+<title id="title">BenchForge — Is it slower, or just noise?</title><desc id="desc">Record benchmark samples, compare two runs with a significance test and gate regressions in CI. By OBEOS.</desc>
+<defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#ffffff" stroke-opacity=".035"/></pattern></defs>
+<rect width="1200" height="400" rx="18" fill="#0c1220"/><rect width="1200" height="400" rx="18" fill="url(#grid)"/>
+<path d="M48 40h42" stroke="#2dd4bf" stroke-width="5"/>
+<text x="106" y="46" fill="#c5cddb" font-family="Arial, sans-serif" font-size="16" letter-spacing="3">BY OBEOS</text>
+<text x="48" y="114" fill="#2dd4bf" font-family="Arial, sans-serif" font-size="16" letter-spacing="3">PERFORMANCE / 07</text>
+<text x="45" y="194" fill="#f3f5fa" font-family="Arial, sans-serif" font-size="76" font-weight="700" letter-spacing="-2">BenchForge</text>
+<text x="48" y="247" fill="#e0e6ef" font-family="Arial, sans-serif" font-size="25">Is it slower, or just noise?</text>
+<text x="48" y="285" fill="#99a7bc" font-family="Arial, sans-serif" font-size="21">Record samples, compare runs with a significance test, gate regressions.</text>
+<path d="M48 331h1104" stroke="#283345"/>
+<text x="48" y="366" fill="#99a7bc" font-family="Arial, sans-serif" font-size="15" letter-spacing="2">LOCAL SYSTEMS. CLEAR PURPOSE.</text>
+<text x="1106" y="366" fill="#2dd4bf" font-family="Arial, sans-serif" font-size="17" font-weight="700">5K</text>
+<g transform="translate(905 66)" fill="none" stroke="#2dd4bf" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M30 20v210h185"/><rect x="55" y="140" width="34" height="90" rx="4"/><rect x="110" y="100" width="34" height="130" rx="4"/><rect x="165" y="50" width="34" height="180" rx="4"/><path d="M30 105h185" stroke-dasharray="10 10"/></g>
+</svg>

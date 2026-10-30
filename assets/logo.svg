@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 240" role="img" aria-labelledby="t d">
+  <title id="t">BenchForge</title>
+  <desc id="d">BenchForge logo: three rising bars crossed by a dashed threshold line, next to the word BenchForge.</desc>
+  <defs>
+    <linearGradient id="word" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#99f6e4"/>
+      <stop offset="0.5" stop-color="#2dd4bf"/>
+      <stop offset="1" stop-color="#0d9488"/>
+    </linearGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b2527"/>
+      <stop offset="1" stop-color="#0c1220"/>
+    </linearGradient>
+  </defs>
+  <rect width="880" height="240" rx="28" fill="url(#bg)"/>
+  <rect x="1.5" y="1.5" width="877" height="237" rx="26.5" fill="none" stroke="#2dd4bf" stroke-opacity="0.35" stroke-width="3"/>
+  <g transform="translate(40 40)">
+    <rect width="160" height="160" rx="36" fill="#081a1c" stroke="#2dd4bf" stroke-width="4"/>
+    <g transform="translate(26 20) scale(.5)" fill="none" stroke="#99f6e4" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M30 20v210h185"/><rect x="55" y="140" width="34" height="90" rx="4"/><rect x="110" y="100" width="34" height="130" rx="4"/><rect x="165" y="50" width="34" height="180" rx="4"/><path d="M30 105h185" stroke-dasharray="10 10"/>
+    </g>
+  </g>
+  <text x="238" y="140" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace"
+        font-size="82" font-weight="700" letter-spacing="1" fill="url(#word)">BenchForge</text>
+  <text x="242" y="188" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace"
+        font-size="26" fill="#8fbdb7">$ is it slower, or just noise<tspan fill="#2dd4bf">_</tspan></text>
+</svg>
