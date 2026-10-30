@@ -1,0 +1,31 @@
+[suite]
+name = "Orchard Sync (demo)"
+
+[[bench]]
+id = "sort-numbers"
+title = "Sort 5,000 integers"
+python = "workload:sort_numbers"
+pythonpath = ["."]
+runs = 30
+
+[[bench]]
+id = "hash-blob"
+title = "SHA-256 of 256 KiB"
+python = "workload:hash_blob"
+pythonpath = ["."]
+runs = 30
+budget_ms = 50
+
+[[bench]]
+id = "json-roundtrip"
+title = "JSON encode and decode"
+python = "workload:json_roundtrip"
+pythonpath = ["."]
+runs = 30
+
+[[bench]]
+id = "interpreter-startup"
+title = "Interpreter start-up"
+cmd = ["python", "-c", "pass"]
+runs = 10
+warmup = 1

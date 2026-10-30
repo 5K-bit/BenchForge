@@ -1,0 +1,10 @@
+BenchForge: Orchard Sync (synthetic)
+baseline 2026-10-01T12:00:00Z  candidate 2026-10-29T12:00:00Z
+regression: slower than 10% with p < 0.01
+  inconclusive cold-start      182.30 ms -> 176.08 ms   0.97x                p -        needs at least 5 samples on each side (have 3 and 3)
+  improvement  compile-rules     9.86 ms -> 6.96 ms     0.71x [0.68, 0.73]   p <0.0001  29.4% faster
+  removed      legacy-export           - -> -           -                    p -        only in baseline
+  added        new-index               - -> -           -                    p -        only in candidate
+  unchanged    parse-config    410.47 us -> 412.44 us   1.00x [0.98, 1.03]   p 0.7845   difference is within noise
+  regression   render-report     2.10 ms -> 2.72 ms     1.30x [1.26, 1.32]   p <0.0001  29.7% slower
+1 regression, 1 inconclusive, 1 improvement, 1 unchanged, 1 added, 1 removed
