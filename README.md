@@ -162,9 +162,9 @@ BenchForge does not claim more than it has shown:
 ## Roadmap
 
 - [x] Suite, runner, result files, statistics, compare, four report formats, demo and recorded evidence
-- [ ] Run on GitHub CI (Linux and Windows) and confirm the matrix is green
+- [x] Run on GitHub CI (Linux and Windows): the matrix is green on `main` (checked 2026-10-31)
 - [x] Local model benchmarks through Ollama (tokens per second, first-token latency, reported model memory)
-- [ ] Run a model suite against a real Ollama and record it as evidence
+- [x] Run a model suite against a real Ollama and record it as evidence (one model, one machine: see Limitations)
 - [ ] Process memory and CPU-time measurements for command benchmarks
 - [ ] A history file and a trend report across many runs
 - [ ] Publish a comparison as ProofBoard evidence (optional OBEOS integration)
