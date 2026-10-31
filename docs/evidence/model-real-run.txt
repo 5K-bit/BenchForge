@@ -1,0 +1,23 @@
+# A real run against a real Ollama, one machine, one afternoon. Machine-specific: not a
+# claim about any other computer, and not reproducible to the digit.
+# recorded 2026-10-31T13:05:51Z on Windows 10 (AMD64, 8 CPUs), CPython 3.11.9, benchforge 0.1.0
+# command: python -m benchforge run -C examples/models      (Ollama on 127.0.0.1:11434)
+# raw result: docs/evidence/model-real-run.json
+
+BenchForge: local models, summary task
+  llama3-2-3b: median 354.69 ms  min 283.20 ms  p95 706.28 ms  stdev 184.58 ms  n=7  outliers 0
+      per generated token, 2.819 tokens/s, first token 3144.916 ms, model memory 2.88 GiB
+  qwen2-5-1-5b: FAILED: model 'qwen2.5:1.5b' not found on http://127.0.0.1:11434 (try: ollama pull qwen2.5:1.5b)
+
+# What this shows
+- llama3.2:3b measured end to end: 2 prompts, 178 generated tokens per pass, 7 passes, output
+  byte-identical across passes (output_stable: yes, sha256 4591f1cb...), tokens/s and memory
+  read from Ollama's own counters.
+- A model that is not pulled is reported as a failed benchmark with the fix to run, and the other
+  benchmark still completes.
+
+# What this does not show
+- Only one model finished; there is no model-to-model comparison from real data yet.
+- Spread is wide (283 ms to 706 ms per token, the first pass 619 ms): the machine was not
+  otherwise idle and no attempt was made to quiet it. Treat the median as indicative.
+- One machine, one run. Nothing here was repeated on another computer.

@@ -106,7 +106,7 @@ runs = 7               # passes over all prompts (default 5); warmup defaults to
 
 Add one `[[bench]]` per model with the same prompts, run once, then `benchforge compare` two result files (or two runs of the same model after a change). Requires `ollama serve` and the model pulled. A full example is [`examples/models/benchforge.toml`](examples/models/benchforge.toml). Timings are the durations Ollama reports for itself; memory is what `/api/ps` says the loaded model occupies. `budget_ms` on a model benchmark means milliseconds *per token*.
 
-Without Ollama you can still see the whole flow against a stand-in server with invented timings: `python examples/model_demo.py --out /tmp/evidence` (recorded in [docs/evidence/model-transcript.txt](docs/evidence/model-transcript.txt)). That demonstrates the plumbing and statistics, not any real model.
+Without Ollama you can still see the whole flow against a stand-in server with invented timings: `python examples/model_demo.py --out /tmp/evidence` (recorded in [docs/evidence/model-transcript.txt](docs/evidence/model-transcript.txt)). That demonstrates the plumbing and statistics, not any real model. A real run is recorded separately in [docs/evidence/model-real-run.txt](docs/evidence/model-real-run.txt).
 
 | Verdict | Meaning |
 |---|---|
@@ -152,7 +152,7 @@ BenchForge does not claim more than it has shown:
 - **Statistics are approximate.** The p-value uses a normal approximation (reasonable from about 10 samples per side). At the default alpha of 0.01, about one comparison in a hundred of identical code is flagged.
 - **Time, plus what Ollama reports.** Command and Python benchmarks measure wall-clock time only. Model benchmarks add tokens per second, first-token latency and the loaded model's memory as Ollama reports it; BenchForge does not measure process memory itself, CPU time or allocations.
 - **Model results are not quality results.** Speed says nothing about how good the answers are. Output is compared only by hash between passes, to flag nondeterminism; it is not scored.
-- **No real model was benchmarked in the recorded evidence.** The model transcript uses a stand-in server. The HTTP client is tested against a local fake of Ollama's `/api/generate` and `/api/ps`; it has not yet been run against a real Ollama in CI.
+- **Only one real model has been benchmarked, once.** [`model-real-run.txt`](docs/evidence/model-real-run.txt) records llama3.2:3b on one Windows machine (wide spread, machine not idle); a second model was not pulled and is recorded as failed. The comparison transcript still uses a stand-in server, and CI tests the HTTP client against a local fake of Ollama's `/api/generate` and `/api/ps`, not a real Ollama.
 - **Model comparisons need like-for-like conditions.** Same prompts, same `num_predict`, a warm model, nothing else using the GPU or RAM; different quantisations are different models.
 - **Command benchmarks include process start-up.** That is the point for a CLI, and a distortion for a library; use a Python callable for the latter.
 - **Callables run in the same process.** Earlier benchmarks can warm caches for later ones; order matters little but is not controlled.

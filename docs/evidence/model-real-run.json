@@ -1,0 +1,54 @@
+{
+ "benchmarks": [
+  {
+   "budget_ms": null,
+   "error": null,
+   "id": "llama3-2-3b",
+   "kind": "model",
+   "loops": 1,
+   "metrics": {
+    "first_token_ms_median": 3144.916,
+    "generated_tokens_per_pass": 178,
+    "model_memory_bytes": 3093687172,
+    "model_vram_bytes": 3093687172,
+    "output_sha256": "4591f1cbf751c1184323b96253cb401f484c13dc775c993d847d22d4c9c518ce",
+    "output_stable": "yes",
+    "prompt_tokens_per_s_median": 13.768,
+    "prompts": 2,
+    "tokens_per_s_median": 2.819
+   },
+   "samples": [
+    619020471,
+    283199837,
+    320105404,
+    706284280,
+    320917870,
+    354690483,
+    653457516
+   ],
+   "title": "llama3.2:3b",
+   "unit": "ns"
+  },
+  {
+   "budget_ms": null,
+   "error": "model 'qwen2.5:1.5b' not found on http://127.0.0.1:11434 (try: ollama pull qwen2.5:1.5b)",
+   "id": "qwen2-5-1-5b",
+   "kind": "model",
+   "loops": 1,
+   "samples": [],
+   "title": "qwen2.5:1.5b",
+   "unit": "ns"
+  }
+ ],
+ "created": "2026-10-31T13:05:51Z",
+ "environment": {
+  "benchforge": "0.1.0",
+  "cpus": "8",
+  "implementation": "CPython",
+  "machine": "AMD64",
+  "platform": "Windows-10",
+  "python": "3.11.9"
+ },
+ "format": 1,
+ "suite": "local models, summary task"
+}
