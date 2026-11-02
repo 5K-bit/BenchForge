@@ -17,9 +17,9 @@ prompts = [
 ]
 
 [[bench]]
-id = "qwen2-5-1-5b"
-title = "qwen2.5:1.5b"
-model = "qwen2.5:1.5b"
+id = "llama3-2-1b"
+title = "llama3.2:1b"
+model = "llama3.2:1b"
 num_predict = 128
 runs = 7
 prompts = [
