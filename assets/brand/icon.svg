@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="t">
+  <title id="t">BenchForge icon</title>
+  <rect width="256" height="256" rx="56" fill="#0c1220"/>
+  <rect x="6" y="6" width="244" height="244" rx="50" fill="none" stroke="#2dd4bf" stroke-opacity=".35" stroke-width="4"/>
+  <g transform="translate(41.67 39.90) scale(0.7048)" fill="none" stroke="#2dd4bf" stroke-width="14.19" stroke-linecap="round" stroke-linejoin="round"><path d="M30 20v210h185"/><rect x="55" y="140" width="34" height="90" rx="4"/><rect x="110" y="100" width="34" height="130" rx="4"/><rect x="165" y="50" width="34" height="180" rx="4"/><path d="M30 105h185" stroke-dasharray="10 10"/></g>
+</svg>
