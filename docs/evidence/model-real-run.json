@@ -7,40 +7,59 @@
    "kind": "model",
    "loops": 1,
    "metrics": {
-    "first_token_ms_median": 3144.916,
+    "first_token_ms_median": 2300.634,
     "generated_tokens_per_pass": 178,
-    "model_memory_bytes": 3093687172,
-    "model_vram_bytes": 3093687172,
+    "model_memory_bytes": 5962591108,
+    "model_vram_bytes": 5962591108,
     "output_sha256": "4591f1cbf751c1184323b96253cb401f484c13dc775c993d847d22d4c9c518ce",
     "output_stable": "yes",
-    "prompt_tokens_per_s_median": 13.768,
+    "prompt_tokens_per_s_median": 18.441,
     "prompts": 2,
-    "tokens_per_s_median": 2.819
+    "tokens_per_s_median": 3.873
    },
    "samples": [
-    619020471,
-    283199837,
-    320105404,
-    706284280,
-    320917870,
-    354690483,
-    653457516
+    251180814,
+    258176337,
+    253135000,
+    258624129,
+    277049050,
+    265571820,
+    251025612
    ],
    "title": "llama3.2:3b",
    "unit": "ns"
   },
   {
    "budget_ms": null,
-   "error": "model 'qwen2.5:1.5b' not found on http://127.0.0.1:11434 (try: ollama pull qwen2.5:1.5b)",
-   "id": "qwen2-5-1-5b",
+   "error": null,
+   "id": "llama3-2-1b",
    "kind": "model",
    "loops": 1,
-   "samples": [],
-   "title": "qwen2.5:1.5b",
+   "metrics": {
+    "first_token_ms_median": 849.971,
+    "generated_tokens_per_pass": 206,
+    "model_memory_bytes": 2571559239,
+    "model_vram_bytes": 2571559239,
+    "output_sha256": "a2cb5ee7d8afcea5184853ba648f2f850d03847e60f177e3771d25b6d0bf6084",
+    "output_stable": "yes",
+    "prompt_tokens_per_s_median": 51.158,
+    "prompts": 2,
+    "tokens_per_s_median": 5.573
+   },
+   "samples": [
+    167154257,
+    170618509,
+    179449786,
+    190687548,
+    196131902,
+    180175378,
+    167636019
+   ],
+   "title": "llama3.2:1b",
    "unit": "ns"
   }
  ],
- "created": "2026-10-31T13:05:51Z",
+ "created": "2026-11-02T22:52:33Z",
  "environment": {
   "benchforge": "0.1.0",
   "cpus": "8",
